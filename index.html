@@ -80,7 +80,7 @@
         <!-- Header -->
         <header class="text-center">
             <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600" style="font-family: 'Poppins', sans-serif;">Spin to the Slide</h1>
-            <p class="text-gray-400 mt-2">Pick a random player and jump directly to their presentation slide.</p>
+            <p id="pageSubtitle" class="text-gray-400 mt-2">Pick a random player and jump directly to their presentation slide.</p>
         </header>
 
         <!-- Presentation URL Input is now in a modal -->
@@ -198,6 +198,11 @@
                  </p>
             </div>
 
+            <div class="mt-4">
+                 <label for="subtitleInput" class="block text-sm font-medium text-gray-300 mb-2">Page Subtitle</label>
+                 <input type="text" id="subtitleInput" placeholder="Describe your auction or event..." class="w-full bg-gray-700 text-white border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
             <hr class="border-gray-700 my-6">
 
             <div>
@@ -228,6 +233,7 @@
             const soldPlayersContainer = document.getElementById('soldPlayersContainer');
             const passedPlayersContainer = document.getElementById('passedPlayersContainer');
             const passedPlayerListDiv = document.getElementById('passedPlayerList');
+            const pageSubtitle = document.getElementById('pageSubtitle');
             const presentationUrlInput = document.getElementById('presentationUrl');
 
             // Modal Elements
@@ -247,6 +253,7 @@
             const settingsBtn = document.getElementById('settingsBtn');
             const settingsModal = document.getElementById('settingsModal');
             const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+            const subtitleInput = document.getElementById('subtitleInput');
             const bulkPlayersTextarea = document.getElementById('bulkPlayers');
             const addBulkPlayersBtn = document.getElementById('addBulkPlayersBtn');
             
@@ -257,6 +264,17 @@
             let currentPlayerForAuction = null;
             let rotation = 0;
             const colors = ["#6366F1", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#D946EF", "#F43F5E"];
+
+            // Load saved settings from local storage
+            const savedSubtitle = localStorage.getItem('pageSubtitle');
+            if (savedSubtitle) {
+                pageSubtitle.textContent = savedSubtitle;
+                subtitleInput.value = savedSubtitle;
+            }
+            const savedUrl = localStorage.getItem('presentationUrl');
+            if (savedUrl) {
+                presentationUrlInput.value = savedUrl;
+            }
 
             // Functions
             const showNotification = (title, message) => {
@@ -549,7 +567,18 @@
                 bulkPlayersTextarea.value = playerListText;
                 settingsModal.classList.remove('hidden');
             };
+
             const closeSettingsModal = () => settingsModal.classList.add('hidden');
+
+            const updateSubtitle = (newSubtitle) => {
+                const defaultSubtitle = 'Pick a random player and jump directly to their presentation slide.';
+                pageSubtitle.textContent = newSubtitle || defaultSubtitle;
+                localStorage.setItem('pageSubtitle', newSubtitle);
+            };
+
+            const saveUrl = () => {
+                localStorage.setItem('presentationUrl', presentationUrlInput.value);
+            };
 
             // Event Listeners
             addPlayerBtn.addEventListener('click', handleAddPlayer);
@@ -565,6 +594,9 @@
             settingsBtn.addEventListener('click', openSettingsModal);
             closeSettingsModalBtn.addEventListener('click', closeSettingsModal);
             addBulkPlayersBtn.addEventListener('click', handleBulkAddPlayers);
+            subtitleInput.addEventListener('input', () => updateSubtitle(subtitleInput.value));
+            presentationUrlInput.addEventListener('input', saveUrl);
+
 
             // Initial Draw
             drawWheel();
@@ -572,6 +604,4 @@
     </script>
 </body>
 </html>
-
-
 
