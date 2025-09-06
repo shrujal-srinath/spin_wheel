@@ -513,7 +513,12 @@
                     const actualRotation = rotation % 360;
                     const arcSizeDegrees = 360 / unsoldPlayers.length;
                     
-                    const winningSegmentIndex = Math.floor((360 - actualRotation) / arcSizeDegrees) % unsoldPlayers.length;
+                    // Corrected calculation for the winning segment
+                    // The pointer is at the top (270 degrees on the canvas coordinate system)
+                    // This calculation correctly finds which segment is under the pointer after rotation.
+                    const pointerAngle = 270; 
+                    const winningAngle = (pointerAngle - actualRotation + 360) % 360;
+                    const winningSegmentIndex = Math.floor(winningAngle / arcSizeDegrees);
                     
                     const [winner] = unsoldPlayers.splice(winningSegmentIndex, 1);
                     currentPlayerForAuction = winner;
@@ -604,4 +609,5 @@
     </script>
 </body>
 </html>
+
 
