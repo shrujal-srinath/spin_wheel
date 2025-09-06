@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin the Wheel - Slide Jumper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            color: #F9FAFB;
+        }
+        .wheel-container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid #FBBF24; /* amber-400 */
+            z-index: 10;
+        }
+        #spinBtn {
+            font-family: 'Poppins', sans-serif;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        #spinBtn:hover {
+            transform: scale(1.05);
+        }
+        #spinBtn:active {
+            transform: scale(0.98);
+        }
+        #spinBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .modal-content {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        summary {
+            list-style: none; /* Hide default summary marker */
+        }
+        details[open] > .collapsible-content {
+            animation: slide-down 0.3s ease-out;
+        }
+        @keyframes slide-down {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-900 text-gray-100">
+
+    <div class="w-full max-w-6xl mx-auto space-y-8 relative">
+        <!-- Settings Button -->
+        <button id="settingsBtn" class="absolute top-0 right-0 p-2 text-gray-400 hover:text-white transition-colors z-20" title="Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </button>
+
+        <!-- Header -->
+        <header class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600" style="font-family: 'Poppins', sans-serif;">Spin to the Slide</h1>
+            <p class="text-gray-400 mt-2">Pick a random player and jump directly to their presentation slide.</p>
+        </header>
+
+        <!-- Presentation URL Input is now in a modal -->
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Panel: Player Management (Collapsible Form) -->
+            <div class="lg:col-span-1 bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col">
+                <details open>
+                    <summary class="flex justify-between items-center font-bold text-2xl cursor-pointer">
+                        <span>Add Player</span>
+                        <svg class="w-6 h-6 transition-transform duration-300 transform open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <div class="collapsible-content mt-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="playerName" class="block text-sm font-medium text-gray-300">Player Name</label>
+                                <input type="text" id="playerName" class="mt-1 block w-full bg-gray-700 text-white border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="slideNumber" class="block text-sm font-medium text-gray-300">Slide Number</label>
+                                <input type="number" id="slideNumber" min="1" class="mt-1 block w-full bg-gray-700 text-white border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <button id="addPlayerBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                                Add Player
+                            </button>
+                        </div>
+                    </div>
+                </details>
+
+                <hr class="border-gray-700 my-6">
+
+                <div class="flex-grow flex flex-col space-y-6">
+                    <!-- Unsold Players List -->
+                    <div id="unsoldPlayersContainer">
+                        <h3 class="text-xl font-bold mb-4">Yet to Come</h3>
+                        <div id="unsoldPlayerList" class="flex-grow space-y-2 max-h-40 overflow-y-auto pr-2">
+                             <p class="text-gray-500 text-center">No players added yet.</p>
+                        </div>
+                    </div>
+
+                    <!-- Sold Players List -->
+                    <div id="soldPlayersContainer" class="hidden">
+                        <h3 class="text-xl font-bold mb-4 text-green-400">Sold</h3>
+                        <div id="soldPlayerList" class="flex-grow space-y-2 max-h-40 overflow-y-auto pr-2 opacity-70">
+                            <!-- Sold players will be injected here -->
+                        </div>
+                    </div>
+                     <!-- Passed/Unsold Players List -->
+                    <div id="passedPlayersContainer" class="hidden">
+                        <h3 class="text-xl font-bold mb-4 text-gray-400">Passed / Unsold</h3>
+                        <div id="passedPlayerList" class="flex-grow space-y-2 max-h-40 overflow-y-auto pr-2 opacity-70">
+                            <!-- Passed players will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: The Wheel -->
+            <div class="lg:col-span-2 flex flex-col items-center justify-center bg-gray-800 p-6 rounded-lg shadow-lg">
+                <div class="wheel-container relative w-full max-w-md aspect-square mb-6">
+                    <canvas id="wheelCanvas" width="500" height="500" class="w-full h-full rounded-full"></canvas>
+                </div>
+                <button id="spinBtn" class="text-2xl font-bold bg-amber-400 hover:bg-amber-500 text-gray-900 py-3 px-12 rounded-full shadow-lg">
+                    SPIN THE WHEEL!
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Winner Modal -->
+    <div id="winnerModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="modal-content bg-gray-800 text-center p-8 rounded-2xl shadow-2xl border border-gray-700 max-w-sm mx-auto">
+            <p class="text-lg text-gray-400">Next Up for Auction...</p>
+            <h2 id="winnerName" class="text-4xl font-bold my-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600"></h2>
+            <p class="text-gray-400 mb-6">The wheel has selected the next player.</p>
+            <a id="goToSlideBtn" href="#" target="_blank" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors mb-4">
+                Go to Slide
+            </a>
+            <div class="flex space-x-2">
+                <button id="markUnsoldBtn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    UNSOLD
+                </button>
+                <button id="markSoldBtn" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition-colors">
+                    SOLD
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] hidden">
+        <div class="modal-content bg-gray-800 text-center p-8 rounded-2xl shadow-2xl border border-yellow-500 max-w-sm mx-auto">
+            <h2 id="notificationTitle" class="text-2xl font-bold mb-4 text-yellow-400"></h2>
+            <p id="notificationMessage" class="text-gray-300 mb-6"></p>
+            <button id="closeNotificationBtn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition-colors">
+                Got it
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="modal-content bg-gray-800 text-left p-8 rounded-2xl shadow-2xl border border-gray-700 max-w-md mx-auto w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Settings</h2>
+                <button id="closeSettingsModalBtn" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div>
+                 <label for="presentationUrl" class="block text-sm font-medium text-gray-300 mb-2">Presentation URL</label>
+                 <input type="url" id="presentationUrl" placeholder="https://docs.google.com/presentation/d/your-id/edit" class="w-full bg-gray-700 text-white border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                 <p class="text-xs text-gray-500 mt-2">
+                    Tip: For Google Slides, use the URL from the editor. The slide number will be appended automatically (e.g., #slide=5).
+                 </p>
+            </div>
+
+            <hr class="border-gray-700 my-6">
+
+            <div>
+                <label for="bulkPlayers" class="block text-sm font-medium text-gray-300 mb-2">Bulk Add Players</label>
+                <textarea id="bulkPlayers" rows="8" class="w-full bg-gray-700 text-white border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Player One 1&#10;Player Two 2&#10;Another Player 5"></textarea>
+                <p class="text-xs text-gray-500 mt-2">
+                    Enter one player per line. The player's name followed by their slide number.
+                </p>
+                <button id="addBulkPlayersBtn" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Add Players from List
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const spinBtn = document.getElementById('spinBtn');
+            const addPlayerBtn = document.getElementById('addPlayerBtn');
+            const playerNameInput = document.getElementById('playerName');
+            const slideNumberInput = document.getElementById('slideNumber');
+            const unsoldPlayerListDiv = document.getElementById('unsoldPlayerList');
+            const soldPlayerListDiv = document.getElementById('soldPlayerList');
+            const soldPlayersContainer = document.getElementById('soldPlayersContainer');
+            const passedPlayersContainer = document.getElementById('passedPlayersContainer');
+            const passedPlayerListDiv = document.getElementById('passedPlayerList');
+            const presentationUrlInput = document.getElementById('presentationUrl');
+
+            // Modal Elements
+            const winnerModal = document.getElementById('winnerModal');
+            const winnerNameEl = document.getElementById('winnerName');
+            const goToSlideBtn = document.getElementById('goToSlideBtn');
+            const markSoldBtn = document.getElementById('markSoldBtn');
+            const markUnsoldBtn = document.getElementById('markUnsoldBtn');
+
+            // Notification Modal Elements
+            const notificationModal = document.getElementById('notificationModal');
+            const notificationTitle = document.getElementById('notificationTitle');
+            const notificationMessage = document.getElementById('notificationMessage');
+            const closeNotificationBtn = document.getElementById('closeNotificationBtn');
+
+            // Settings Modal Elements
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsModal = document.getElementById('settingsModal');
+            const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+            const bulkPlayersTextarea = document.getElementById('bulkPlayers');
+            const addBulkPlayersBtn = document.getElementById('addBulkPlayersBtn');
+            
+            // State
+            let unsoldPlayers = [];
+            let soldPlayers = [];
+            let passedPlayers = [];
+            let currentPlayerForAuction = null;
+            let rotation = 0;
+            const colors = ["#6366F1", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#D946EF", "#F43F5E"];
+
+            // Functions
+            const showNotification = (title, message) => {
+                notificationTitle.textContent = title;
+                notificationMessage.textContent = message;
+                notificationModal.classList.remove('hidden');
+            };
+
+            const closeNotification = () => {
+                notificationModal.classList.add('hidden');
+            };
+
+            const drawWheel = () => {
+                const numSegments = unsoldPlayers.length;
+                if (numSegments === 0) {
+                    // Draw a placeholder wheel
+                    ctx.clearRect(0, 0, 500, 500);
+                    ctx.beginPath();
+                    ctx.arc(250, 250, 248, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#374151'; // gray-700
+                    ctx.fill();
+                    ctx.save();
+                    ctx.fillStyle = '#9CA3AF'; // gray-400
+                    ctx.font = '24px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('Add players to start!', 250, 250);
+                    ctx.restore();
+                    return;
+                }
+                
+                const arcSize = (2 * Math.PI) / numSegments;
+                ctx.clearRect(0, 0, 500, 500);
+
+                for (let i = 0; i < numSegments; i++) {
+                    const angle = i * arcSize;
+                    
+                    // Draw segment
+                    ctx.beginPath();
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.moveTo(250, 250);
+                    ctx.arc(250, 250, 250, angle, angle + arcSize);
+                    ctx.lineTo(250, 250);
+                    ctx.fill();
+
+                    // Draw text
+                    ctx.save();
+                    ctx.translate(250, 250);
+                    ctx.rotate(angle + arcSize / 2);
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = 'bold 20px Inter';
+                    ctx.fillText(unsoldPlayers[i].name, 230, 10);
+                    ctx.restore();
+                }
+            };
+            
+            const updatePlayerLists = () => {
+                // Update Unsold List
+                if (unsoldPlayers.length === 0) {
+                    unsoldPlayerListDiv.innerHTML = '<p class="text-gray-500 text-center">No players left!</p>';
+                } else {
+                    unsoldPlayerListDiv.innerHTML = '';
+                    unsoldPlayers.forEach((player, index) => {
+                        const playerEl = document.createElement('div');
+                        playerEl.className = 'flex justify-between items-center bg-gray-700 p-2 rounded-md animate-fadeIn';
+                        playerEl.innerHTML = `
+                            <div>
+                                <span class="font-semibold">${player.name}</span>
+                                <span class="text-xs text-gray-400 ml-2">(Slide #${player.slide})</span>
+                            </div>
+                            <button data-index="${index}" class="remove-btn text-red-400 hover:text-red-500">&times;</button>
+                        `;
+                        unsoldPlayerListDiv.appendChild(playerEl);
+                    });
+                }
+
+                // Update Sold List
+                if (soldPlayers.length > 0) {
+                    soldPlayersContainer.classList.remove('hidden');
+                    soldPlayerListDiv.innerHTML = '';
+                    soldPlayers.forEach(player => {
+                         const playerEl = document.createElement('div');
+                        playerEl.className = 'flex justify-between items-center bg-gray-900 p-2 rounded-md animate-fadeIn';
+                        playerEl.innerHTML = `
+                            <div>
+                                <span class="font-semibold">${player.name}</span>
+                                <span class="text-xs text-gray-500 ml-2">(Slide #${player.slide})</span>
+                            </div>
+                        `;
+                        soldPlayerListDiv.appendChild(playerEl);
+                    });
+                } else {
+                    soldPlayersContainer.classList.add('hidden');
+                }
+
+                // Update Passed/Unsold List
+                if (passedPlayers.length > 0) {
+                    passedPlayersContainer.classList.remove('hidden');
+                    passedPlayerListDiv.innerHTML = '';
+                    passedPlayers.forEach(player => {
+                         const playerEl = document.createElement('div');
+                        playerEl.className = 'flex justify-between items-center bg-gray-900 p-2 rounded-md animate-fadeIn';
+                        playerEl.innerHTML = `
+                            <div>
+                                <span class="font-semibold">${player.name}</span>
+                                <span class="text-xs text-gray-500 ml-2">(Slide #${player.slide})</span>
+                            </div>
+                        `;
+                        passedPlayerListDiv.appendChild(playerEl);
+                    });
+                } else {
+                    passedPlayersContainer.classList.add('hidden');
+                }
+            };
+
+            const handleAddPlayer = () => {
+                const name = playerNameInput.value.trim();
+                const slide = parseInt(slideNumberInput.value);
+                if (name && slide) {
+                    // Check for duplicate slide number
+                    const allSlides = [...unsoldPlayers.map(p => p.slide), ...soldPlayers.map(p => p.slide), ...passedPlayers.map(p => p.slide)];
+                    if (allSlides.includes(slide)) {
+                        showNotification('Duplicate Slide Number', `Slide number ${slide} is already assigned. Please use a unique number.`);
+                        return;
+                    }
+
+                    unsoldPlayers.push({ name, slide });
+                    playerNameInput.value = '';
+                    slideNumberInput.value = '';
+                    updatePlayerLists();
+                    drawWheel();
+                    playerNameInput.focus();
+                } else {
+                    showNotification('Missing Information', "Please enter both player name and slide number.");
+                }
+            };
+            
+            const handleRemovePlayer = (e) => {
+                if (e.target.classList.contains('remove-btn')) {
+                    const index = parseInt(e.target.dataset.index);
+                    unsoldPlayers.splice(index, 1);
+                    updatePlayerLists();
+                    drawWheel();
+                }
+            };
+
+            const handleBulkAddPlayers = () => {
+                const bulkText = bulkPlayersTextarea.value.trim();
+                const lines = bulkText.split('\n');
+                const newPlayerList = [];
+                const slideCheck = new Set();
+                const duplicates = new Set();
+
+                for (const line of lines) {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) continue; // Skip empty lines
+
+                    const lastSpaceIndex = trimmedLine.lastIndexOf(' ');
+                    if (lastSpaceIndex === -1 || lastSpaceIndex === 0 || lastSpaceIndex === trimmedLine.length - 1) {
+                        showNotification('Invalid Format', `The line "${trimmedLine}" is not in the correct 'Name Number' format. Please check your list.`);
+                        return;
+                    }
+
+                    const name = trimmedLine.substring(0, lastSpaceIndex).trim();
+                    const slideStr = trimmedLine.substring(lastSpaceIndex + 1).trim();
+                    const slide = parseInt(slideStr);
+
+                    if (!name || isNaN(slide)) {
+                        showNotification('Invalid Format', `Could not parse the line "${trimmedLine}". Please ensure it ends with a valid number.`);
+                        return;
+                    }
+
+                    if (slideCheck.has(slide)) {
+                        duplicates.add(slide);
+                    } else {
+                        slideCheck.add(slide);
+                        newPlayerList.push({ name, slide });
+                    }
+                }
+
+                if (duplicates.size > 0) {
+                    showNotification(
+                        'Duplicate Slide Numbers Found',
+                        `Your list contains duplicate slide numbers: ${[...duplicates].join(', ')}. Please make all slide numbers unique.`
+                    );
+                    return;
+                }
+
+                // Replace the old player list with the new one.
+                unsoldPlayers = newPlayerList;
+                soldPlayers = []; // Reset sold players, as the bulk add is the new source of truth for who is available.
+                passedPlayers = []; // Also reset passed players
+
+                updatePlayerLists();
+                drawWheel();
+                closeSettingsModal();
+            };
+
+            const animateSpin = (endRotation, onComplete) => {
+                const startRotation = rotation;
+                const duration = 5000; // 5 seconds
+                let startTime = null;
+
+                const step = (timestamp) => {
+                    if (!startTime) startTime = timestamp;
+                    const progress = Math.min((timestamp - startTime) / duration, 1);
+                    // ease-out-quart function for a nice slow down
+                    const easedProgress = 1 - Math.pow(1 - progress, 4);
+
+                    const currentAngle = startRotation + (endRotation - startRotation) * easedProgress;
+                    canvas.style.transform = `rotate(${currentAngle}deg)`;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        onComplete();
+                    }
+                };
+
+                requestAnimationFrame(step);
+            };
+
+            const spinWheel = () => {
+                if (unsoldPlayers.length < 1) {
+                    showNotification('No Players Left', 'There are no players in the "Yet to Come" list to spin for.');
+                    return;
+                }
+                spinBtn.disabled = true;
+
+                const degrees = Math.floor(Math.random() * 360) + 3600; // 10+ full rotations + random part
+                const endRotation = rotation + degrees;
+
+                const onSpinComplete = () => {
+                    rotation = endRotation;
+                    const actualRotation = rotation % 360;
+                    const arcSizeDegrees = 360 / unsoldPlayers.length;
+                    
+                    const winningSegmentIndex = Math.floor((360 - actualRotation) / arcSizeDegrees) % unsoldPlayers.length;
+                    
+                    const [winner] = unsoldPlayers.splice(winningSegmentIndex, 1);
+                    currentPlayerForAuction = winner;
+                    
+                    updatePlayerLists();
+                    drawWheel(); 
+
+                    winnerNameEl.textContent = winner.name;
+                    const presentationUrl = presentationUrlInput.value.trim();
+                    if(presentationUrl) {
+                        goToSlideBtn.href = `${presentationUrl}#slide=${winner.slide}`;
+                        goToSlideBtn.style.display = 'block';
+                    } else {
+                        goToSlideBtn.style.display = 'none';
+                    }
+                    winnerModal.classList.remove('hidden');
+                };
+
+                animateSpin(endRotation, onSpinComplete);
+            };
+
+            const closeModal = () => {
+                winnerModal.classList.add('hidden');
+                if (unsoldPlayers.length >= 1) {
+                    spinBtn.disabled = false;
+                }
+            };
+
+            const handleMarkSold = () => {
+                if (currentPlayerForAuction) {
+                    soldPlayers.push(currentPlayerForAuction);
+                    currentPlayerForAuction = null;
+                    updatePlayerLists();
+                    closeModal();
+                }
+            };
+            
+            const handleMarkUnsold = () => {
+                 if (currentPlayerForAuction) {
+                    passedPlayers.push(currentPlayerForAuction);
+                    currentPlayerForAuction = null;
+                    updatePlayerLists();
+                    closeModal();
+                }
+            };
+
+            const openSettingsModal = () => {
+                const allPlayers = [...unsoldPlayers, ...soldPlayers, ...passedPlayers];
+                allPlayers.sort((a, b) => a.slide - b.slide); // Sort for consistency
+                const playerListText = allPlayers.map(p => `${p.name} ${p.slide}`).join('\n');
+                bulkPlayersTextarea.value = playerListText;
+                settingsModal.classList.remove('hidden');
+            };
+            const closeSettingsModal = () => settingsModal.classList.add('hidden');
+
+            // Event Listeners
+            addPlayerBtn.addEventListener('click', handleAddPlayer);
+            unsoldPlayerListDiv.addEventListener('click', handleRemovePlayer);
+            spinBtn.addEventListener('click', spinWheel);
+            
+            markSoldBtn.addEventListener('click', handleMarkSold);
+            markUnsoldBtn.addEventListener('click', handleMarkUnsold);
+
+            closeNotificationBtn.addEventListener('click', closeNotification);
+
+            // Settings Listeners
+            settingsBtn.addEventListener('click', openSettingsModal);
+            closeSettingsModalBtn.addEventListener('click', closeSettingsModal);
+            addBulkPlayersBtn.addEventListener('click', handleBulkAddPlayers);
+
+            // Initial Draw
+            drawWheel();
+        });
+    </script>
+</body>
+</html>
+
+
+
